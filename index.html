@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Probar API REST</title>
+  <style>
+
+    article{
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    article img{
+      max-width: 100%;
+      width: 320px;
+      height: auto;
+    }
+
+  </style>
+  <script type="module">
+
+    let main = document.getElementById("main")
+
+    async function getMovies(){
+      try {
+        let result = await fetch("http://localhost:4000/movies")
+
+        let json = await result.json()
+
+        const html = json.map(movie =>{
+          return `
+
+          <article data-id='${movie.id}''>
+            <h2>${movie.title}</h2> 
+            <img src="${movie.poster}">
+            <h3>${movie.year}</h3>
+
+            <button>Eliminar</button>
+          </article>
+          
+          `
+        })
+
+        main.innerHTML = html
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+
+    document.addEventListener("click", (e) =>{
+      if (e.target.matches("button")) {
+        const article = e.target.closest("article")
+        const id = article.dataset.id
+
+        fetch(`http://localhost:4000/movies/${id}`, {
+          method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(res =>  {
+          if(res.success) article.remove()
+          getMovies()
+        })
+      }
+    })
+
+    document.addEventListener("DOMContentLoaded",getMovies)
+
+  </script>
+</head>
+<body>
+  <main id="main"></main>
+</body>
+</html>
